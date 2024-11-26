@@ -1,0 +1,14 @@
+{
+  "name": "node",
+  "version": "1.0.0",
+  "description": "Node simple API with only one endpoint that inserts user on Postgres DB",
+  "main": "index.js",
+  "scripts": {
+    "start": "NODE_ENV=production node --env-file=.env index.mjs"
+  },
+  "author": "Codista",
+  "license": "GPL",
+  "dependencies": {
+    "pg": "^8.11.3"
+  }
+}

@@ -1,0 +1,52 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres_user
+      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_DB: postgres_database
+    volumes:
+      - ./tofu/create-db.sql:/docker-entrypoint-initdb.d/init.sql
+
+  node-api:
+    build: ./node-api
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: postgres_user
+      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_DATABASE: postgres_database
+      PORT: 3000
+    depends_on:
+      - postgres
+
+  go-api:
+    build: ./go-api
+    ports:
+      - "3001:3000"
+    environment:
+      GO_ENV: development
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: postgres_user
+      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_DATABASE: postgres_database
+      PORT: 3000
+    depends_on:
+      - postgres
+
+  gun:
+    build: load-tester/vegeta
+    environment:
+      SERVER_API_IP: go-api # Switch between node-api/go-api 
+      RATE: 1000 # How many requests/s
+    volumes:
+      - ./load-tester/vegeta:/data
+    depends_on:
+      - node-api
+      - go-api
